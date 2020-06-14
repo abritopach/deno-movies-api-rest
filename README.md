@@ -20,6 +20,26 @@ Install drun
     deno install --allow-read --allow-run --unstable https://deno.land/x/drun@v1.1.0/drun.ts
 ```
 
+Edit
+
+```bash
+    vim ~/.zshrc
+
+    OR
+
+    vim ~/.bashrc
+```
+
+After that command, please add this line end of file and save and exit
+
+```bash
+    // LINUX
+    export PATH="/home/username/.deno/bin:$PATH"
+
+    // MAC
+    export PATH="/Users/username/.deno/bin:$PATH"
+```
+
 Run `drun` for a dev server. Navigate to `http://localhost:3000/`. The app will automatically reload if you change any of the source files.
 
 ## Requirements
