@@ -4,13 +4,20 @@
 
 <a href="https://www.buymeacoffee.com/h6WVj4HcD" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/yellow_img.png" alt="Buy Me A Coffee"></a>
 
-Sample project that shows how to build a simple Movies Rest API with Deno.
+Sample project that shows how to build a simple Movies Rest API with Deno & Oak.
 
 This project has been developed to learn & practice my skills with Deno. This project shows you how to:
 
     * Create an API to manage movies catalog.
     * Provide GET, POST, PUT, and DELETE routes.
     * Save created/updated movies to a local JSON file.
+
+## Project Folder Structure
+
+    * Folder controllers: has a logic of the application and handles the client requests.
+    * Folder routes: containing API routes.
+    * Folder types: contain the model definition.
+    * File server.ts: code to run localhost server.
 
 ## Development server (drun)
 
@@ -45,3 +52,4 @@ Run `drun` for a dev server. Navigate to `http://localhost:3000/`. The app will 
 ## Requirements
 
 * [Deno](https://deno.land/)
+* [Oak](https://github.com/oakserver/oak)

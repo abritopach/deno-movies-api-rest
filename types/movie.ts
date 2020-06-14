@@ -28,10 +28,10 @@ export interface IMovie {
     director: string;
     cast: string;
     genre: Genre;
-    notes: string;
-    poster: string;
-    genreImage: string;
-    comments: string[];
-    rate: number;
-    numVotes: number;
+    notes?: string;
+    poster?: string;
+    genreImage?: string;
+    comments?: string[];
+    rate?: number;
+    numVotes?: number;
 }

@@ -8,3 +8,5 @@ router.get('/api/v1/movies', getMovies)
     .post('/api/v1/movies', addMovie)
     .put('/api/v1/movies/:id', updateMovie)
     .delete('/api/v1/movies/:id', deleteMovie)
+
+export default router

@@ -1,10 +1,13 @@
 import { Application } from 'https://deno.land/x/oak/mod.ts';
-
-// Set Host and Port.
-const HOST = "127.0.0.1";
-const PORT = 3000;
+import router from './routes/routes.ts';
+import { green, yellow } from 'https://deno.land/std@0.53.0/fmt/colors.ts';
+import { APP_HOST, APP_PORT } from './config/config.ts';
 
 const app = new Application();
+
+// Routes.
+app.use(router.routes())
+app.use(router.allowedMethods())
 
 // Logger.
 app.use(async (ctx, next) => {
@@ -20,5 +23,5 @@ app.use(async (ctx, next) => {
     ctx.response.headers.set("X-Response-Time", `${ms}ms`);
 });
 
-console.log(`Welcome to the Movies API built with Deno:) ${HOST}:${PORT}...`);
-await app.listen(`${HOST}:${PORT}`);
+console.log(`${yellow("Welcome to the Movies API built with Deno:")} ${green(APP_HOST)}:${green(APP_PORT.toString())}`);
+await app.listen(`${APP_HOST}:${APP_PORT}`);
