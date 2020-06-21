@@ -72,6 +72,11 @@ const addMovie = async (ctx: Context) => {
         const { value } = await ctx.request.body();
         const movie: IMovie = {...value};
         movies.push(movie);
+
+        const json = JSON.stringify(movie);
+        const data = new TextEncoder().encode(json)
+        await Deno.writeFile(FILE_PATH, data, { append: true });
+
         ctx.response.status = 201;
         ctx.response.body = {
             success: true,

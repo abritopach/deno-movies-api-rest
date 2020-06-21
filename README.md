@@ -11,6 +11,7 @@ This project has been developed to learn & practice my skills with Deno. This pr
     * Create an API to manage movies catalog.
     * Provide GET, POST, PUT, and DELETE routes.
     * Save created/updated movies to a local JSON file.
+    * Read, write JSON file.
 
 ## Project Folder Structure
 
