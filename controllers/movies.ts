@@ -1,65 +1,68 @@
 // Deno
 import { Context, helpers, Status, isHttpError} from 'https://deno.land/x/oak/mod.ts';
-import { v4 } from 'https://deno.land/std/uuid/mod.ts';
+import { readJson } from 'https://deno.land/std/fs/mod.ts';
 
 // Project
-import { IMovie, Genre } from "../types/movie.ts";
+import { IMovie } from "../types/movie.ts";
+import { FILE_PATH } from '../config/config.ts';
 
 // Array movies
-let movies: Array<IMovie> = [
-    {
-        "id": v4.generate(),
-        "title": "Test Movie 2",
-        "year": 2018,
-        "director": "",
-        "cast": "",
-        "genre": Genre.Comedy,
-        "notes": "Test movie notes modified",
-        "poster": "https://about.canva.com/wp-content/uploads/sites/3/2015/01/school_poster.png"
-    },
-    {
-        "id": v4.generate(),
-        "title": "Test Movie 4 modified",
-        "year": 2018,
-        "director": "",
-        "cast": "",
-        "genre": Genre.Comedy,
-        "notes": "",
-        "poster": "https://images-na.ssl-images-amazon.com/images/I/51YdMLhgROL.jpg",
-        "genreImage": "assets/movies-genres/comedy.png",
-        "comments": [
-            "Prueba",
-            "Test"
-        ],
-        "rate": 5,
-        "numVotes": 1
-    }
-];
+let data = await readJson(FILE_PATH) as {movies: Array<IMovie>};
+let movies = data.movies;
+
+// console.log('movies', movies)
+/*
+let movies: Array<IMovie> = []
+try {
+    const decoder = new TextDecoder();
+    const data = await Deno.readFile(FILE_PATH);
+    const movies = JSON.parse(decoder.decode(data)) as Array<IMovie>;
+    console.log('movies', movies)
+} catch(error) {
+    console.error(error)
+}
+*/
 
 // Return all movies.
 const getMovies = (ctx: Context) => {
-    ctx.response.status = 200;
-    ctx.response.body = movies;
+    try {
+        ctx.response.status = 200;
+        ctx.response.body = {
+            success: true,
+            message: "Fetched movies successfully.",
+            data: movies
+        };
+    } catch(error) {
+        handleError(error)
+    }
 }
 
 // Return movie by id.
 const getMovie = (ctx: Context) => {
-    const { id } = helpers.getQuery(ctx, { mergeParams: true });
-    const movie = movies.filter((movie: IMovie) => movie.id == id).pop();
-    if (movie) {
+    try {
+        const { id } = helpers.getQuery(ctx, { mergeParams: true });
+        console.log('id', id);
         ctx.response.status = 200;
-        ctx.response.body = {
-            success: true,
-            message: "Fetched movie successfully.",
-            data: movie
-        };
-    } else {
-        ctx.response.status = 400;
-        ctx.response.body = {
-            success: false,
-            message: "Movie not found.",
-            data: []
-        };
+
+        const movie = movies.filter((movie: IMovie) => movie.id === id).pop();
+        console.log('movie', movie);
+        if (movie) {
+            ctx.response.status = 200;
+            ctx.response.body = {
+                success: true,
+                message: "Fetched movie successfully.",
+                data: movie
+            };
+        } else {
+            ctx.response.status = 400;
+            ctx.response.body = {
+                success: false,
+                message: "Movie not found.",
+                data: []
+            };
+        }
+    } catch(error) {
+        handleError(error);
     }
 }
 
@@ -84,15 +87,16 @@ const addMovie = async (ctx: Context) => {
 const updateMovie = async (ctx: Context) => {
     try {
         const { id } = helpers.getQuery(ctx, { mergeParams: true });
-        let movie = movies.filter((movie: IMovie) => movie.id == id).pop();
-        if (movie) {
+
+        const movieIndex = movies.findIndex(movie => movie.id === id);
+        if (movieIndex !== -1) {
             const {value} = await ctx.request.body();
-            movie = {...value}
+            movies[movieIndex] = {...value};
             ctx.response.status = 200;
             ctx.response.body = {
                 success: true,
                 message: "Movie updated successfully.",
-                data: movie,
+                data: movies[movieIndex],
             };
         } else {
             ctx.response.status = 404;
@@ -107,7 +111,7 @@ const updateMovie = async (ctx: Context) => {
     }
 };
 
-// Delete movie
+// Delete movie.
 const deleteMovie = (ctx: Context) => {
     const { id } = helpers.getQuery(ctx, { mergeParams: true });
     movies = movies.filter((movie: IMovie) => movie.id !== id);

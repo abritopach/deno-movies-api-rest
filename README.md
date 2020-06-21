@@ -1,4 +1,4 @@
-# Deno Movies API Rest
+# Deno Movies API Rest WIP :muscle:
 
 **If this project has been useful to you and you want to help me to keep contributing to the open source with projects, examples, plugins,... collaborate and buy me a coffee.**
 
@@ -37,7 +37,7 @@ Edit
     vim ~/.bashrc
 ```
 
-After that command, please add this line end of file and save and exit
+After that command, please add this line at end of file and save and exit.
 
 ```bash
     // LINUX
