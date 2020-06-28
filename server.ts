@@ -5,6 +5,9 @@ import { APP_HOST, APP_PORT } from './config/config.ts';
 
 const app = new Application();
 
+// Middlewares.
+// app.use(errorMiddleware);
+
 // Routes.
 app.use(router.routes())
 app.use(router.allowedMethods())

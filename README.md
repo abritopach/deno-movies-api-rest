@@ -15,8 +15,11 @@ This project has been developed to learn & practice my skills with Deno. This pr
 
 ## Project Folder Structure
 
+    * Folder config: contains global application configuration.
     * Folder controllers: has a logic of the application and handles the client requests.
+    * Folder middlewares: provide functions that run on every request.
     * Folder routes: containing API routes.
+    * Folder services: contains services.
     * Folder types: contain the model definition.
     * File server.ts: code to run localhost server.
 

@@ -4,28 +4,13 @@ import { readJson } from 'https://deno.land/std/fs/mod.ts';
 
 // Project
 import { IMovie } from "../types/movie.ts";
-import { FILE_PATH } from '../config/config.ts';
-
-// Array movies
-let data = await readJson(FILE_PATH) as {movies: Array<IMovie>};
-let movies = data.movies;
-
-// console.log('movies', movies)
-/*
-let movies: Array<IMovie> = []
-try {
-    const decoder = new TextDecoder();
-    const data = await Deno.readFile(FILE_PATH);
-    const movies = JSON.parse(decoder.decode(data)) as Array<IMovie>;
-    console.log('movies', movies)
-} catch(error) {
-    console.error(error)
-}
-*/
+import { DB_PATH } from '../config/config.ts';
+import { service } from "../services/movies.ts";
 
 // Return all movies.
-const getMovies = (ctx: Context) => {
+const getMovies = async (ctx: Context) => {
     try {
+        const movies = await service.getMovies();
         ctx.response.status = 200;
         ctx.response.body = {
             success: true,
@@ -38,13 +23,13 @@ const getMovies = (ctx: Context) => {
 }
 
 // Return movie by id.
-const getMovie = (ctx: Context) => {
+const getMovie = async (ctx: Context) => {
     try {
         const { id } = helpers.getQuery(ctx, { mergeParams: true });
         console.log('id', id);
-        ctx.response.status = 200;
 
-        const movie = movies.filter((movie: IMovie) => movie.id === id).pop();
+        // const movie = movies.filter((movie: IMovie) => movie.id === id).pop();
+        const movie = await service.getMovie(id);
         console.log('movie', movie);
         if (movie) {
             ctx.response.status = 200;
@@ -70,19 +55,18 @@ const getMovie = (ctx: Context) => {
 const addMovie = async (ctx: Context) => {
     try {
         const { value } = await ctx.request.body();
-        const movie: IMovie = {...value};
-        movies.push(movie);
 
-        const json = JSON.stringify(movie);
-        const data = new TextEncoder().encode(json)
-        await Deno.writeFile(FILE_PATH, data, { append: true });
+        const movie: IMovie = await service.addMovie(value);
+        console.log('addMovie movie', movie);
 
-        ctx.response.status = 201;
-        ctx.response.body = {
-            success: true,
-            message: "Movie created successfully.",
-            data: movie
-        };
+        if (movie) {
+            ctx.response.status = 201;
+            ctx.response.body = {
+                success: true,
+                message: "Movie created successfully.",
+                data: movie
+            };
+        }
     } catch(error) {
         handleError(error);
     }
@@ -90,6 +74,8 @@ const addMovie = async (ctx: Context) => {
 
 // Update existing movie.
 const updateMovie = async (ctx: Context) => {
+
+    /*
     try {
         const { id } = helpers.getQuery(ctx, { mergeParams: true });
 
@@ -114,10 +100,12 @@ const updateMovie = async (ctx: Context) => {
     } catch(error) {
         handleError(error);
     }
+    */
 };
 
 // Delete movie.
 const deleteMovie = (ctx: Context) => {
+    /*
     const { id } = helpers.getQuery(ctx, { mergeParams: true });
     movies = movies.filter((movie: IMovie) => movie.id !== id);
     ctx.response.status = 200;
@@ -126,9 +114,11 @@ const deleteMovie = (ctx: Context) => {
         message: "Movie removed successfully.",
         data: []
     };
+    */
 };
 
 const handleError = (err: any) => {
+    console.log('handleError', err);
     if (isHttpError(err)) {
         switch (err.status) {
             case Status.NotFound:
