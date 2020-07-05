@@ -1,22 +1,15 @@
 // Deno
 import { Context, helpers, Status, isHttpError} from 'https://deno.land/x/oak/mod.ts';
-import { readJson } from 'https://deno.land/std/fs/mod.ts';
 
 // Project
 import { IMovie } from "../types/movie.ts";
-import { DB_PATH } from '../config/config.ts';
 import { service } from "../services/movies.ts";
 
 // Return all movies.
 const getMovies = async (ctx: Context) => {
     try {
         const movies = await service.getMovies();
-        ctx.response.status = 200;
-        ctx.response.body = {
-            success: true,
-            message: "Fetched movies successfully.",
-            data: movies
-        };
+        sendResponse(ctx, 200, { success: true, message: "Fetched movies successfully.", data: movies});
     } catch(error) {
         handleError(error)
     }
@@ -32,20 +25,10 @@ const getMovie = async (ctx: Context) => {
         const movie = await service.getMovie(id);
         console.log('movie', movie);
         if (movie) {
-            ctx.response.status = 200;
-            ctx.response.body = {
-                success: true,
-                message: "Fetched movie successfully.",
-                data: movie
-            };
+            sendResponse(ctx, 200, {success: true, message: "Fetched movie successfully.", data: movie});
             return;
         } else {
-            ctx.response.status = 400;
-            ctx.response.body = {
-                success: false,
-                message: "Movie not found.",
-                data: []
-            };
+            sendResponse(ctx, 400, {success: false, message: "Movie not found.", data: []});
             return;
         }
     } catch(error) {
@@ -62,12 +45,7 @@ const addMovie = async (ctx: Context) => {
         console.log('addMovie movie', movie);
 
         if (movie) {
-            ctx.response.status = 201;
-            ctx.response.body = {
-                success: true,
-                message: "Movie created successfully.",
-                data: movie
-            };
+            sendResponse(ctx, 201, {success: true, message: "Movie created successfully.", data: movie});
         }
     } catch(error) {
         handleError(error);
@@ -83,33 +61,18 @@ const updateMovie = async (ctx: Context) => {
         const { value } = await ctx.request.body();
 
         if (!id) {
-            ctx.response.status = 400;
-            ctx.response.body = {
-                success: false,
-                message: "Invalid movie id.",
-                data: []
-            };
+            sendResponse(ctx, 400, {success: false, message: "Invalid movie id.", data: []});
             return;
         }
 
         if (!value) {
-            ctx.response.status = 400;
-            ctx.response.body = {
-                success: false,
-                message: "Invalid movie data.",
-                data: []
-            };
+            sendResponse(ctx, 400, {success: false, message: "Invalid movie data.", data: []});
             return;
         }
 
         const updatedMovie = await service.updateMovie(id, value);
 
-        ctx.response.status = 200;
-        ctx.response.body = {
-            success: true,
-            message: "Movie updated successfully.",
-            data: updatedMovie,
-        };
+        sendResponse(ctx, 200, {success: true, message: "Movie updated successfully.", data: updatedMovie});
 
     } catch(error) {
         handleError(error);
@@ -122,38 +85,28 @@ const deleteMovie = async (ctx: Context) => {
         const { id } = helpers.getQuery(ctx, { mergeParams: true });
 
         if (!id) {
-            ctx.response.status = 400;
-            ctx.response.body = {
-                success: false,
-                message: "Invalid movie id.",
-                data: []
-            };
+            sendResponse(ctx, 400, {success: false, message: "Invalid movie id.", data: []});
             return;
         }
 
         const foundMovie = await service.getMovie(id);
         console.log('foundMovie', foundMovie);
         if (!foundMovie) {
-            ctx.response.status = 404;
-            ctx.response.body = {
-                success: false,
-                message: `Movie with ID ${id} not found`,
-                data: []
-            };
+            sendResponse(ctx, 404, {success: false, message: `Movie with ID ${id} not found`, data: []});
             return;
         }
 
         await service.deleteMovie(id);
-        ctx.response.status = 200;
-        ctx.response.body = {
-            success: true,
-            message: "Movie removed successfully.",
-            data: []
-        };
+        sendResponse(ctx, 200, {success: true, message: "Movie removed successfully.", data: []});
     } catch(error) {
         handleError(error);
     }
 };
+
+const sendResponse = (ctx: Context, status: number, body: {success: boolean, message: string, data: IMovie | IMovie[]}) => {
+    ctx.response.status = status;
+    ctx.response.body = body;
+}
 
 
 const handleError = (err: any) => {
