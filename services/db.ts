@@ -32,7 +32,8 @@ export const persistData = async (data: Array<IMovie>): Promise<void> => {
         const json = JSON.stringify(jsonObject);
         const encoder = new TextEncoder().encode(json);
         // await Deno.writeFile(DB_PATH, encoder, { append: true });
-        return await Deno.writeFile(DB_PATH, encoder);
+        await Deno.writeFile(DB_PATH, encoder);
+        return;
     } catch(error) {
         console.error(error);
     }

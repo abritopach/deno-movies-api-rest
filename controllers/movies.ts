@@ -38,6 +38,7 @@ const getMovie = async (ctx: Context) => {
                 message: "Fetched movie successfully.",
                 data: movie
             };
+            return;
         } else {
             ctx.response.status = 400;
             ctx.response.body = {
@@ -45,6 +46,7 @@ const getMovie = async (ctx: Context) => {
                 message: "Movie not found.",
                 data: []
             };
+            return;
         }
     } catch(error) {
         handleError(error);
@@ -75,63 +77,100 @@ const addMovie = async (ctx: Context) => {
 // Update existing movie.
 const updateMovie = async (ctx: Context) => {
 
-    /*
     try {
         const { id } = helpers.getQuery(ctx, { mergeParams: true });
 
-        const movieIndex = movies.findIndex(movie => movie.id === id);
-        if (movieIndex !== -1) {
-            const {value} = await ctx.request.body();
-            movies[movieIndex] = {...value};
-            ctx.response.status = 200;
-            ctx.response.body = {
-                success: true,
-                message: "Movie updated successfully.",
-                data: movies[movieIndex],
-            };
-        } else {
-            ctx.response.status = 404;
+        const { value } = await ctx.request.body();
+
+        if (!id) {
+            ctx.response.status = 400;
             ctx.response.body = {
                 success: false,
-                message: "Movie not found.",
+                message: "Invalid movie id.",
                 data: []
             };
+            return;
         }
+
+        if (!value) {
+            ctx.response.status = 400;
+            ctx.response.body = {
+                success: false,
+                message: "Invalid movie data.",
+                data: []
+            };
+            return;
+        }
+
+        const updatedMovie = await service.updateMovie(id, value);
+
+        ctx.response.status = 200;
+        ctx.response.body = {
+            success: true,
+            message: "Movie updated successfully.",
+            data: updatedMovie,
+        };
+
     } catch(error) {
         handleError(error);
     }
-    */
 };
 
 // Delete movie.
-const deleteMovie = (ctx: Context) => {
-    /*
-    const { id } = helpers.getQuery(ctx, { mergeParams: true });
-    movies = movies.filter((movie: IMovie) => movie.id !== id);
-    ctx.response.status = 200;
-    ctx.response.body = {
-        success: true,
-        message: "Movie removed successfully.",
-        data: []
-    };
-    */
+const deleteMovie = async (ctx: Context) => {
+    try {
+        const { id } = helpers.getQuery(ctx, { mergeParams: true });
+
+        if (!id) {
+            ctx.response.status = 400;
+            ctx.response.body = {
+                success: false,
+                message: "Invalid movie id.",
+                data: []
+            };
+            return;
+        }
+
+        const foundMovie = await service.getMovie(id);
+        console.log('foundMovie', foundMovie);
+        if (!foundMovie) {
+            ctx.response.status = 404;
+            ctx.response.body = {
+                success: false,
+                message: `Movie with ID ${id} not found`,
+                data: []
+            };
+            return;
+        }
+
+        await service.deleteMovie(id);
+        ctx.response.status = 200;
+        ctx.response.body = {
+            success: true,
+            message: "Movie removed successfully.",
+            data: []
+        };
+    } catch(error) {
+        handleError(error);
+    }
 };
+
 
 const handleError = (err: any) => {
     console.log('handleError', err);
     if (isHttpError(err)) {
         switch (err.status) {
             case Status.NotFound:
-                // handle NotFound
+                // Handle NotFound.
                 break;
             case Status.InternalServerError:
-                // handle InternalServerError
+                // Handle InternalServerError.
                 break;
             default:
-            // handle other statuses
+            // Handle other statuses.
         }
     } else {
-        // rethrow if you can't handle the error
+        // Rethrow if you can't handle the error.
         throw err;
     }
 }

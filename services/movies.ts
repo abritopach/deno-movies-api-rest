@@ -21,8 +21,31 @@ export const addMovie = async (movieData: IMovie): Promise<IMovie> => {
     return newMovie;
 };
 
+export const updateMovie = async (movieId: string, movieData: IMovie): Promise<IMovie> => {
+    const movie = await getMovie(movieId);
+
+    if (!movie) {
+        throw new Error("Movie not found.");
+    }
+
+    const updatedMovie: IMovie = {...movie, ...movieData};
+    const movies = await fetchData();
+    const filteredMovies = movies.filter((movie: IMovie) => movie.id !== movieId);
+    persistData([...filteredMovies, updatedMovie]);
+    return movieData;
+};
+
+export const deleteMovie = async (movieId: string): Promise<void> => {
+    const movies = await fetchData();
+    const filteredMovies = movies.filter((movie: IMovie) => movie.id !== movieId);
+    await persistData(filteredMovies);
+    return;
+};
+
 export const service = {
     getMovies,
     getMovie,
-    addMovie
+    addMovie,
+    updateMovie,
+    deleteMovie
 }
