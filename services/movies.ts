@@ -16,7 +16,6 @@ export const getMovie = async (movieId: string): Promise<IMovie | undefined> => 
 export const addMovie = async (movieData: IMovie): Promise<IMovie> => {
     const movies = await fetchData();
     const newMovie: IMovie = {...movieData};
-    console.log('addMovie service', newMovie);
     await persistData([...movies, newMovie]);
     return newMovie;
 };

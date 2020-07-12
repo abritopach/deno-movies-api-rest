@@ -17,6 +17,7 @@ This project has been developed to learn & practice my skills with Deno. This pr
 
     * Folder config: contains global application configuration.
     * Folder controllers: has a logic of the application and handles the client requests.
+    * Folder db: Local file that simulates the movies database.
     * Folder middlewares: provide functions that run on every request.
     * Folder routes: containing API routes.
     * Folder services: contains services.

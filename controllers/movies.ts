@@ -2,14 +2,71 @@
 import { Context, helpers, Status, isHttpError} from 'https://deno.land/x/oak/mod.ts';
 
 // Project
-import { IMovie } from "../types/movie.ts";
+import { IMovie, Genre } from "../types/movie.ts";
 import { service } from "../services/movies.ts";
+
+enum OrderType {
+    DESC = "desc",
+    ASC = "asc"
+}
+
+enum QueryStringType {
+    GENRE = "genre",
+    SORT = "_sort",
+    ORDER = "_order",
+    LIMIT = "_limit"
+}
 
 // Return all movies.
 const getMovies = async (ctx: Context) => {
     try {
-        const movies = await service.getMovies();
-        sendResponse(ctx, 200, { success: true, message: "Fetched movies successfully.", data: movies});
+
+        const queryString = helpers.getQuery(ctx, { mergeParams: true });
+
+        if (Object.keys(queryString).length === 0) {
+            const movies = await service.getMovies();
+            sendResponse(ctx, 200, { success: true, message: "Fetched movies successfully.", data: movies});
+        }
+        else {
+
+            let movies = await service.getMovies();
+
+            Object.keys(queryString).forEach(param => {
+                switch(param) {
+                    case QueryStringType.LIMIT: {
+                        const limit = +queryString[param];
+                        movies = movies.slice(0, limit);
+                        break;
+                    }
+                    case QueryStringType.SORT: {
+                        let sort = queryString[param].split(',');
+                        const orders = queryString[QueryStringType.ORDER].split(',')
+                        if (sort.includes('title')) {
+                            const index = sort.indexOf('title');
+                            const titleOrder = orders[index];
+                            const sortCondition = (m1: IMovie , m2: IMovie) => titleOrder === OrderType.ASC ? m1.title.localeCompare(m2.title) :
+                            m2.title.localeCompare(m1.title);
+                            movies = movies.sort(sortCondition);
+                        }
+                        if (sort.includes('year')) {
+                            const index = sort.indexOf('year');
+                            const yearOrder = orders[index];
+                            const sortCondition = (m1: IMovie , m2: IMovie) => yearOrder === OrderType.ASC ? m1.year - m2.year :
+                            m2.year - m1.year
+                            movies = movies.sort(sortCondition);
+                        }
+                        break;
+                    }
+                    case QueryStringType.GENRE: {
+                        const filterCondition = (movie: IMovie) => movie.genre === queryString[param];
+                        movies = movies.filter(filterCondition);
+                        break;
+                    }
+                }
+            });
+
+            sendResponse(ctx, 200, { success: true, message: "Fetched movies successfully.", data: movies});
+        }
     } catch(error) {
         handleError(error)
     }
@@ -19,11 +76,8 @@ const getMovies = async (ctx: Context) => {
 const getMovie = async (ctx: Context) => {
     try {
         const { id } = helpers.getQuery(ctx, { mergeParams: true });
-        console.log('id', id);
 
-        // const movie = movies.filter((movie: IMovie) => movie.id === id).pop();
         const movie = await service.getMovie(id);
-        console.log('movie', movie);
         if (movie) {
             sendResponse(ctx, 200, {success: true, message: "Fetched movie successfully.", data: movie});
             return;
@@ -40,9 +94,7 @@ const getMovie = async (ctx: Context) => {
 const addMovie = async (ctx: Context) => {
     try {
         const { value } = await ctx.request.body();
-
         const movie: IMovie = await service.addMovie(value);
-        console.log('addMovie movie', movie);
 
         if (movie) {
             sendResponse(ctx, 201, {success: true, message: "Movie created successfully.", data: movie});
@@ -90,7 +142,6 @@ const deleteMovie = async (ctx: Context) => {
         }
 
         const foundMovie = await service.getMovie(id);
-        console.log('foundMovie', foundMovie);
         if (!foundMovie) {
             sendResponse(ctx, 404, {success: false, message: `Movie with ID ${id} not found`, data: []});
             return;
